@@ -1,0 +1,47 @@
+{
+  "week_of": "March 16 - March 22, 2026",
+  "generated_at": "2026-03-21T22:31:00.000Z",
+  "digest_text": "This week, Pakistani open-source developers delivered a strong mix of AI, frontend, DevOps, and data tooling. Ahmed Khan pushed practical language AI work with llm-urdu-nlp and a Pakistan-focused RAG pipeline, while Sara Ali expanded polished React and Next.js starters for faster product delivery. On the infrastructure side, Bilal Raza shipped reusable GitHub Actions release workflows and hardening-focused Docker assets, helping teams improve deployment reliability. Data engineering momentum stayed visible through Zain Malik's ETL and observability projects, and mobile innovation continued with Hina Noor's Flutter and React Native apps focused on everyday usability. Overall, the ecosystem showed healthy breadth: production workflows, developer tooling, and user-facing apps all moved forward in parallel.",
+  "repos": [
+    {
+      "owner": "ahmed-dev",
+      "name": "llm-urdu-nlp",
+      "description": "A language model toolkit for Urdu NLP tasks.",
+      "stars": 245,
+      "language": "Python",
+      "url": "https://github.com/ahmed-dev/llm-urdu-nlp"
+    },
+    {
+      "owner": "sara-builds",
+      "name": "react-admin-kit",
+      "description": "Composable React admin dashboard starter.",
+      "stars": 201,
+      "language": "TypeScript",
+      "url": "https://github.com/sara-builds/react-admin-kit"
+    },
+    {
+      "owner": "bilalops",
+      "name": "gha-release-pipeline",
+      "description": "GitHub Actions release workflows for monorepos.",
+      "stars": 149,
+      "language": "YAML",
+      "url": "https://github.com/bilalops/gha-release-pipeline"
+    },
+    {
+      "owner": "zain-data",
+      "name": "pk-etl-warehouse",
+      "description": "ETL workflows for analytics warehouse ingestion.",
+      "stars": 118,
+      "language": "Python",
+      "url": "https://github.com/zain-data/pk-etl-warehouse"
+    },
+    {
+      "owner": "hina-mobile",
+      "name": "flutter-health-tracker",
+      "description": "Cross-platform health tracking app in Flutter.",
+      "stars": 109,
+      "language": "Dart",
+      "url": "https://github.com/hina-mobile/flutter-health-tracker"
+    }
+  ]
+}

@@ -1,0 +1,279 @@
+{
+  "last_updated": "2026-03-21T22:30:00.000Z",
+  "total_devs": 5,
+  "leaderboard": [
+    {
+      "rank": 1,
+      "username": "ahmed-dev",
+      "name": "Ahmed Khan",
+      "avatar_url": "https://avatars.githubusercontent.com/u/100001?v=4",
+      "bio": "Building practical AI tools for Urdu and Punjabi NLP.",
+      "location": "Lahore",
+      "followers": 340,
+      "public_repos": 42,
+      "created_at": "2019-04-12T10:00:00Z",
+      "events_30d": 67,
+      "digest_repos": [
+        {
+          "owner": "ahmed-dev",
+          "name": "llm-urdu-nlp",
+          "description": "A language model toolkit for Urdu NLP tasks.",
+          "stars": 245,
+          "language": "Python",
+          "url": "https://github.com/ahmed-dev/llm-urdu-nlp"
+        },
+        {
+          "owner": "ahmed-dev",
+          "name": "pakistan-news-rag",
+          "description": "RAG pipeline over Pakistani news archives.",
+          "stars": 131,
+          "language": "TypeScript",
+          "url": "https://github.com/ahmed-dev/pakistan-news-rag"
+        }
+      ],
+      "total_stars": 890,
+      "top_repos": [
+        {
+          "name": "llm-urdu-nlp",
+          "description": "A language model toolkit for Urdu NLP tasks.",
+          "stars": 245,
+          "url": "https://github.com/ahmed-dev/llm-urdu-nlp",
+          "language": "Python"
+        },
+        {
+          "name": "pakistan-news-rag",
+          "description": "RAG pipeline over Pakistani news archives.",
+          "stars": 131,
+          "url": "https://github.com/ahmed-dev/pakistan-news-rag",
+          "language": "TypeScript"
+        },
+        {
+          "name": "urdu-tokenizer",
+          "description": "Fast Urdu tokenization and normalization library.",
+          "stars": 88,
+          "url": "https://github.com/ahmed-dev/urdu-tokenizer",
+          "language": "Python"
+        }
+      ],
+      "top_languages": [
+        "Python",
+        "TypeScript",
+        "JavaScript"
+      ],
+      "tags": [],
+      "score": 2341
+    },
+    {
+      "rank": 2,
+      "username": "sara-builds",
+      "name": "Sara Ali",
+      "avatar_url": "https://avatars.githubusercontent.com/u/100002?v=4",
+      "bio": "Frontend engineer making fast React and Next.js products.",
+      "location": "Karachi",
+      "followers": 290,
+      "public_repos": 37,
+      "created_at": "2018-08-01T09:00:00Z",
+      "events_30d": 59,
+      "digest_repos": [
+        {
+          "owner": "sara-builds",
+          "name": "react-admin-kit",
+          "description": "Composable React admin dashboard starter.",
+          "stars": 201,
+          "language": "TypeScript",
+          "url": "https://github.com/sara-builds/react-admin-kit"
+        }
+      ],
+      "total_stars": 760,
+      "top_repos": [
+        {
+          "name": "react-admin-kit",
+          "description": "Composable React admin dashboard starter.",
+          "stars": 201,
+          "url": "https://github.com/sara-builds/react-admin-kit",
+          "language": "TypeScript"
+        },
+        {
+          "name": "next-commerce-pk",
+          "description": "A localized e-commerce storefront with Next.js.",
+          "stars": 163,
+          "url": "https://github.com/sara-builds/next-commerce-pk",
+          "language": "JavaScript"
+        },
+        {
+          "name": "tailwind-ui-lab",
+          "description": "Reusable Tailwind UI components and patterns.",
+          "stars": 94,
+          "url": "https://github.com/sara-builds/tailwind-ui-lab",
+          "language": "TypeScript"
+        }
+      ],
+      "top_languages": [
+        "TypeScript",
+        "JavaScript",
+        "CSS"
+      ],
+      "tags": [],
+      "score": 2108
+    },
+    {
+      "rank": 3,
+      "username": "bilalops",
+      "name": "Bilal Raza",
+      "avatar_url": "https://avatars.githubusercontent.com/u/100003?v=4",
+      "bio": "Cloud and platform engineer automating CI/CD at scale.",
+      "location": "Islamabad",
+      "followers": 220,
+      "public_repos": 31,
+      "created_at": "2017-01-20T14:20:00Z",
+      "events_30d": 44,
+      "digest_repos": [
+        {
+          "owner": "bilalops",
+          "name": "gha-release-pipeline",
+          "description": "GitHub Actions release workflows for monorepos.",
+          "stars": 149,
+          "language": "YAML",
+          "url": "https://github.com/bilalops/gha-release-pipeline"
+        }
+      ],
+      "total_stars": 602,
+      "top_repos": [
+        {
+          "name": "gha-release-pipeline",
+          "description": "GitHub Actions release workflows for monorepos.",
+          "stars": 149,
+          "url": "https://github.com/bilalops/gha-release-pipeline",
+          "language": "YAML"
+        },
+        {
+          "name": "terraform-pk-stack",
+          "description": "Production-ready Terraform templates for AWS.",
+          "stars": 123,
+          "url": "https://github.com/bilalops/terraform-pk-stack",
+          "language": "HCL"
+        },
+        {
+          "name": "docker-hardening",
+          "description": "Docker hardening baselines and audit scripts.",
+          "stars": 97,
+          "url": "https://github.com/bilalops/docker-hardening",
+          "language": "Shell"
+        }
+      ],
+      "top_languages": [
+        "Shell",
+        "HCL",
+        "YAML"
+      ],
+      "tags": [],
+      "score": 1762
+    },
+    {
+      "rank": 4,
+      "username": "zain-data",
+      "name": "Zain Malik",
+      "avatar_url": "https://avatars.githubusercontent.com/u/100004?v=4",
+      "bio": "Data engineer focused on analytics and ETL pipelines.",
+      "location": "Rawalpindi",
+      "followers": 180,
+      "public_repos": 28,
+      "created_at": "2020-02-15T07:30:00Z",
+      "events_30d": 39,
+      "digest_repos": [
+        {
+          "owner": "zain-data",
+          "name": "pk-etl-warehouse",
+          "description": "ETL workflows for analytics warehouse ingestion.",
+          "stars": 118,
+          "language": "Python",
+          "url": "https://github.com/zain-data/pk-etl-warehouse"
+        }
+      ],
+      "total_stars": 511,
+      "top_repos": [
+        {
+          "name": "pk-etl-warehouse",
+          "description": "ETL workflows for analytics warehouse ingestion.",
+          "stars": 118,
+          "url": "https://github.com/zain-data/pk-etl-warehouse",
+          "language": "Python"
+        },
+        {
+          "name": "sql-observability",
+          "description": "SQL lineage and data quality checks.",
+          "stars": 105,
+          "url": "https://github.com/zain-data/sql-observability",
+          "language": "SQL"
+        },
+        {
+          "name": "spark-metrics-kit",
+          "description": "Spark metrics collection and dashboards.",
+          "stars": 76,
+          "url": "https://github.com/zain-data/spark-metrics-kit",
+          "language": "Scala"
+        }
+      ],
+      "top_languages": [
+        "Python",
+        "SQL",
+        "Scala"
+      ],
+      "tags": [],
+      "score": 1588
+    },
+    {
+      "rank": 5,
+      "username": "hina-mobile",
+      "name": "Hina Noor",
+      "avatar_url": "https://avatars.githubusercontent.com/u/100005?v=4",
+      "bio": "Mobile developer shipping Flutter and React Native apps.",
+      "location": "Faisalabad",
+      "followers": 160,
+      "public_repos": 24,
+      "created_at": "2021-05-10T11:11:00Z",
+      "events_30d": 35,
+      "digest_repos": [
+        {
+          "owner": "hina-mobile",
+          "name": "flutter-health-tracker",
+          "description": "Cross-platform health tracking app in Flutter.",
+          "stars": 109,
+          "language": "Dart",
+          "url": "https://github.com/hina-mobile/flutter-health-tracker"
+        }
+      ],
+      "total_stars": 468,
+      "top_repos": [
+        {
+          "name": "flutter-health-tracker",
+          "description": "Cross-platform health tracking app in Flutter.",
+          "stars": 109,
+          "url": "https://github.com/hina-mobile/flutter-health-tracker",
+          "language": "Dart"
+        },
+        {
+          "name": "rn-budget-planner",
+          "description": "React Native budget planner with offline mode.",
+          "stars": 92,
+          "url": "https://github.com/hina-mobile/rn-budget-planner",
+          "language": "TypeScript"
+        },
+        {
+          "name": "kotlin-notes-lite",
+          "description": "Lightweight notes app built for Android.",
+          "stars": 63,
+          "url": "https://github.com/hina-mobile/kotlin-notes-lite",
+          "language": "Kotlin"
+        }
+      ],
+      "top_languages": [
+        "Dart",
+        "TypeScript",
+        "Kotlin"
+      ],
+      "tags": [],
+      "score": 1497
+    }
+  ]
+}

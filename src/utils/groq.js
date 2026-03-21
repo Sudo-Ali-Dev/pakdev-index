@@ -176,9 +176,9 @@ async function generateDeveloperSummary(dev) {
     return summaryCache.get(username);
   }
 
-  const apiKey = process.env.REACT_APP_GROQ_KEY;
+  const apiKey = import.meta.env.VITE_GROQ_KEY;
   if (!apiKey) {
-    console.warn('Module 7: REACT_APP_GROQ_KEY is missing from build');
+    console.warn('Module 7: VITE_GROQ_KEY is missing from build');
     summaryCache.set(username, ERROR_VALUE);
     return ERROR_VALUE;
   }
