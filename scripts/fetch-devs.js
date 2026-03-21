@@ -5,11 +5,25 @@ const path = require('node:path');
 
 const GITHUB_API_BASE = 'https://api.github.com';
 const SEARCH_DELAY_MS = 2000;
+const SEARCH_RETRY_DELAY_MS = 3000;
 const MAX_DEVELOPERS = 300;
+const PRELIMINARY_MAX_DEVELOPERS = 500;
 const USER_EVENTS_PER_PAGE = 90;
+const USER_REPOS_PER_PAGE = 100;
+const SEARCH_MAX_PAGES = 10;
 const INACTIVE_DAYS_CUTOFF = 90;
 const MIN_ACCOUNT_AGE_DAYS = 30;
 const REQUEST_TIMEOUT_MS = 20000;
+const RATE_LIMIT_RETRY_DELAY_MS = 60000;
+const USER_CALL_DELAY_MIN_MS = 100;
+const USER_CALL_DELAY_MAX_MS = 150;
+
+const MEANINGFUL_EVENT_TYPES = new Set([
+  'PushEvent',
+  'PullRequestEvent',
+  'IssuesEvent',
+  'ReleaseEvent'
+]);
 
 const LOCATION_QUERIES = [
   'location:Pakistan',
@@ -60,13 +74,19 @@ function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+function randomDelayMs(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
 function daysSince(date) {
   const now = Date.now();
   const then = new Date(date).getTime();
   return Math.floor((now - then) / (1000 * 60 * 60 * 24));
 }
 
-async function githubRequest(endpoint, token) {
+async function githubRequest(endpoint, token, options = {}) {
+  const { allow404 = false, retriedAfter429 = false } = options;
+
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
@@ -89,6 +109,19 @@ async function githubRequest(endpoint, token) {
     throw error;
   } finally {
     clearTimeout(timeout);
+  }
+
+  if (response.status === 404 && allow404) {
+    return null;
+  }
+
+  if (response.status === 429 && !retriedAfter429) {
+    console.warn(`Rate limited on ${endpoint}; waiting 60s and retrying once.`);
+    await sleep(RATE_LIMIT_RETRY_DELAY_MS);
+    return githubRequest(endpoint, token, {
+      ...options,
+      retriedAfter429: true
+    });
   }
 
   if (!response.ok) {
@@ -154,15 +187,42 @@ async function discoverUsersByLocation(token) {
 
   for (let index = 0; index < LOCATION_QUERIES.length; index += 1) {
     const query = LOCATION_QUERIES[index];
-    console.log(`[discover ${index + 1}/${LOCATION_QUERIES.length}] ${query}`);
+    console.log(`[discover ${index + 1}/${LOCATION_QUERIES.length}] ${query} (pages 1-${SEARCH_MAX_PAGES})`);
 
-    const endpoint = `/search/users?q=${encodeURIComponent(query)}&per_page=100&page=1`;
-    const result = await githubRequest(endpoint, token);
+    let success = false;
 
-    for (const item of result.items || []) {
-      if (item && typeof item.login === 'string') {
-        discovered.push(item.login);
+    for (let attempt = 1; attempt <= 2; attempt += 1) {
+      try {
+        for (let page = 1; page <= SEARCH_MAX_PAGES; page += 1) {
+          const endpoint = `/search/users?q=${encodeURIComponent(query)}&per_page=100&page=${page}`;
+          const result = await githubRequest(endpoint, token);
+
+          const items = result.items || [];
+          for (const item of items) {
+            if (item && typeof item.login === 'string') {
+              discovered.push(item.login);
+            }
+          }
+
+          if (items.length < 100) {
+            break;
+          }
+        }
+
+        success = true;
+        break;
+      } catch (error) {
+        if (attempt === 1) {
+          console.warn(`Search failed for ${query}; retrying once after 3s. Reason: ${error.message}`);
+          await sleep(SEARCH_RETRY_DELAY_MS);
+        } else {
+          console.error(`Skipping query ${query} after retry failure: ${error.message}`);
+        }
       }
+    }
+
+    if (!success) {
+      continue;
     }
 
     if (index < LOCATION_QUERIES.length - 1) {
@@ -195,6 +255,10 @@ function extractRecentEvents(events, maxAgeDays) {
   });
 }
 
+function filterMeaningfulEvents(events) {
+  return (events || []).filter((event) => MEANINGFUL_EVENT_TYPES.has(event.type));
+}
+
 function extractReposPushedInLast7Days(events) {
   const recentPushes = extractRecentEvents(
     (events || []).filter((e) => e.type === 'PushEvent'),
@@ -220,39 +284,132 @@ function extractReposPushedInLast7Days(events) {
   return [...repoMap.values()];
 }
 
-async function fetchDeveloperActivity(username, token) {
-  const [profile, events] = await Promise.all([
-    githubRequest(`/users/${encodeURIComponent(username)}`, token),
-    githubRequest(
-      `/users/${encodeURIComponent(username)}/events/public?per_page=${USER_EVENTS_PER_PAGE}&page=1`,
-      token
-    )
-  ]);
+function mapTopRepos(repos) {
+  return (repos || [])
+    .map((repo) => ({
+      name: repo?.name || '',
+      description: repo?.description || '',
+      stars: Number(repo?.stargazers_count || 0),
+      url: repo?.html_url || '',
+      language: repo?.language || null
+    }))
+    .sort((a, b) => b.stars - a.stars)
+    .slice(0, 3);
+}
 
-  if (isLikelyFakeFromProfile(profile)) {
-    return null;
+function buildDigestRepos(reposActive7d, repos) {
+  if (!Array.isArray(reposActive7d) || reposActive7d.length === 0 || !Array.isArray(repos) || repos.length === 0) {
+    return [];
   }
 
-  const eventsLast90Days = extractRecentEvents(events, INACTIVE_DAYS_CUTOFF);
-  if (eventsLast90Days.length === 0) {
-    return null;
+  const wanted = new Set(reposActive7d);
+  const digestRepos = [];
+
+  for (const repo of repos) {
+    const name = repo?.name || '';
+    if (!name || !wanted.has(name)) {
+      continue;
+    }
+
+    digestRepos.push({
+      owner: repo?.owner?.login || '',
+      name,
+      description: repo?.description || '',
+      stars: Number(repo?.stargazers_count || 0),
+      language: repo?.language || null,
+      url: repo?.html_url || ''
+    });
   }
 
-  const eventsLast30Days = extractRecentEvents(events, 30);
+  return digestRepos;
+}
+
+function summarizeRepos(repos) {
+  let totalStars = 0;
+  const languageCounts = new Map();
+
+  for (const repo of repos || []) {
+    totalStars += Number(repo?.stargazers_count || 0);
+
+    const language = repo?.language;
+    if (language) {
+      languageCounts.set(language, (languageCounts.get(language) || 0) + 1);
+    }
+  }
+
+  const topLanguages = [...languageCounts.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 3)
+    .map(([language]) => language);
 
   return {
-    username: profile.login,
+    total_stars: totalStars,
+    top_languages: topLanguages
+  };
+}
+
+async function fetchAllUserRepos(username, token) {
+  const allRepos = [];
+
+  for (let page = 1; ; page += 1) {
+    const repos = await githubRequest(
+      `/users/${encodeURIComponent(username)}/repos?per_page=${USER_REPOS_PER_PAGE}&page=${page}`,
+      token
+    );
+
+    if (!Array.isArray(repos) || repos.length === 0) {
+      break;
+    }
+
+    allRepos.push(...repos);
+
+    if (repos.length < USER_REPOS_PER_PAGE) {
+      break;
+    }
+  }
+
+  return allRepos;
+}
+
+async function fetchDeveloperActivity(username, token) {
+  const profile = await githubRequest(`/users/${encodeURIComponent(username)}`, token, { allow404: true });
+  if (!profile) {
+    console.warn(`Skipping ${username}: user not found (404).`);
+    return null;
+  }
+
+  const eventsResponse = await githubRequest(
+    `/users/${encodeURIComponent(username)}/events?per_page=${USER_EVENTS_PER_PAGE}&page=1`,
+    token
+  );
+  const events = Array.isArray(eventsResponse) ? eventsResponse : [];
+
+  const repos = await fetchAllUserRepos(username, token);
+
+  const eventsLast90Days = extractRecentEvents(events, INACTIVE_DAYS_CUTOFF);
+  const meaningfulLast30Days = filterMeaningfulEvents(extractRecentEvents(events, 30));
+  const repoSummary = summarizeRepos(repos);
+  const reposActive7d = extractReposPushedInLast7Days(eventsLast90Days).map((repo) => repo.name);
+  const topRepos = mapTopRepos(repos);
+  const digestRepos = buildDigestRepos(reposActive7d, repos);
+
+  return {
+    username: profile.login || username,
     name: profile.name || '',
-    avatar: profile.avatar_url,
+    avatar_url: profile.avatar_url || '',
     bio: profile.bio || '',
     location: profile.location || '',
     followers: profile.followers || 0,
     following: profile.following || 0,
     public_repos: profile.public_repos || 0,
+    total_stars: repoSummary.total_stars,
+    top_repos: topRepos,
+    top_languages: repoSummary.top_languages,
     created_at: profile.created_at,
-    events_30d: eventsLast30Days.length,
-    events_90d: eventsLast90Days.length,
-    repos_pushed_7d: extractReposPushedInLast7Days(eventsLast90Days),
+    events_30d: meaningfulLast30Days.length,
+    events_90d: eventsLast90Days.length > 0,
+    repos_active_7d: reposActive7d,
+    digest_repos: digestRepos,
     raw_events_90d: eventsLast90Days
   };
 }
@@ -270,32 +427,57 @@ async function fetchPakistaniDevelopers(options = {}) {
   const registeredUsers = await loadRegisteredDevelopers(repoRoot);
 
   const merged = dedupeUsernames([...discoveredUsers, ...registeredUsers]);
-  const limited = merged.slice(0, MAX_DEVELOPERS);
+  const preliminaryUsernames = merged.slice(0, PRELIMINARY_MAX_DEVELOPERS);
 
   console.log(`Discovered ${discoveredUsers.length} users from location search.`);
   console.log(`Loaded ${registeredUsers.length} registered users.`);
-  console.log(`Processing ${limited.length} unique users (cap ${MAX_DEVELOPERS}).`);
+  console.log(`Merged ${merged.length} unique users.`);
+  console.log(`Applying preliminary cap: ${preliminaryUsernames.length}/${PRELIMINARY_MAX_DEVELOPERS}`);
 
-  const developers = [];
+  const fetchedDevelopers = [];
 
-  for (let index = 0; index < limited.length; index += 1) {
-    const username = limited[index];
+  for (let index = 0; index < preliminaryUsernames.length; index += 1) {
+    const username = preliminaryUsernames[index];
     if (index % 10 === 0) {
-      console.log(`[fetch ${index + 1}/${limited.length}] ${username}`);
+      console.log(`[fetch ${index + 1}/${preliminaryUsernames.length}] ${username}`);
     }
 
     try {
-      const dev = await fetchDeveloperActivity(username, token);
-      if (dev) {
-        developers.push(dev);
+      const developer = await fetchDeveloperActivity(username, token);
+      if (developer) {
+        fetchedDevelopers.push(developer);
       }
     } catch (error) {
-      // Continue processing if one user fails due to API or data issues.
       console.error(`Skipping ${username}: ${error.message}`);
+    }
+
+    if (index < preliminaryUsernames.length - 1) {
+      await sleep(randomDelayMs(USER_CALL_DELAY_MIN_MS, USER_CALL_DELAY_MAX_MS));
     }
   }
 
-  return developers;
+  const filteredDevelopers = fetchedDevelopers.filter((dev) => {
+    const hasNoRepos = Number(dev.public_repos || 0) === 0;
+    const hasNoNetwork = Number(dev.followers || 0) === 0 && Number(dev.following || 0) === 0;
+    const isVeryNewAccount = daysSince(dev.created_at) < MIN_ACCOUNT_AGE_DAYS;
+    const isInactive = !dev.events_90d;
+
+    return !(hasNoRepos || hasNoNetwork || isVeryNewAccount || isInactive);
+  });
+
+  filteredDevelopers.sort((a, b) => {
+    const followerDiff = Number(b.followers || 0) - Number(a.followers || 0);
+    if (followerDiff !== 0) {
+      return followerDiff;
+    }
+
+    return String(a.username || '').localeCompare(String(b.username || ''));
+  });
+
+  const finalDevelopers = filteredDevelopers.slice(0, MAX_DEVELOPERS);
+
+  console.log(`Fetched: ${fetchedDevelopers.length} | Filtered valid: ${filteredDevelopers.length} | Final capped: ${finalDevelopers.length}`);
+  return finalDevelopers;
 }
 
 module.exports = {
