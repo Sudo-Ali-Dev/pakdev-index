@@ -126,6 +126,16 @@ async function githubRequest(endpoint, token, options = {}) {
 
   if (!response.ok) {
     const body = await response.text();
+    // GitHub Search API returns 403 (Forbidden) instead of 429 when rate limit is exceeded
+    if (response.status === 403 && body.includes('API rate limit exceeded') && !retriedAfter429) {
+      console.warn(`Search Rate limited (403) on ${endpoint}; waiting 65s and retrying once.`);
+      // Wait 65 seconds just to be absolutely safe the minute window resets
+      await sleep(RATE_LIMIT_RETRY_DELAY_MS + 5000);
+      return githubRequest(endpoint, token, {
+        ...options,
+        retriedAfter429: true
+      });
+    }
     throw new Error(`GitHub API error ${response.status} for ${endpoint}: ${body}`);
   }
 
@@ -207,6 +217,10 @@ async function discoverUsersByLocation(token) {
           if (items.length < 100) {
             break;
           }
+          
+          // The Search API restricts authenticated users to exactly 30 requests per minute
+          // We sleep for 2.1 seconds between every page to stay under the limit cleanly.
+          await sleep(2100);
         }
 
         success = true;
