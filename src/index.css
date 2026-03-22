@@ -44,3 +44,14 @@
 .hero-title-shadow {
     text-shadow: 4px 4px 0px rgba(162, 201, 255, 0.1);
 }
+.grid-line-x {
+    background-image: linear-gradient(to right, #414752 1px, transparent 1px);
+    background-size: 40px 100%;
+}
+.grid-line-y {
+    background-image: linear-gradient(to bottom, #414752 1px, transparent 1px);
+    background-size: 100% 40px;
+}
+.crt-glow {
+    text-shadow: 0 0 8px rgba(162, 201, 255, 0.3);
+}

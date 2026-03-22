@@ -41,19 +41,6 @@ function computeTechStack(repos) {
     }));
 }
 
-function getWeekNumber(weekOf) {
-  try {
-    const parts = (weekOf || '').split(' - ');
-    const endStr = (parts[1] || parts[0] || '').trim();
-    const date = new Date(endStr);
-    if (isNaN(date.getTime())) return '??';
-    const start = new Date(date.getFullYear(), 0, 1);
-    return String(Math.ceil(((date - start) / 86400000 + start.getDay() + 1) / 7)).padStart(2, '0');
-  } catch {
-    return '??';
-  }
-}
-
 function getShortDateRange(weekOf) {
   if (!weekOf) return '---';
   try {
@@ -74,7 +61,7 @@ const TECH_BAR_COLORS = [
   { bar: 'bg-tertiary', text: '' },
 ];
 
-export default function WeeklyDigest() {
+export default function WeeklyDigest({ onChangeTab }) {
   const [digestData, setDigestData] = useState(null);
   const [leaderboardData, setLeaderboardData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -138,7 +125,8 @@ export default function WeeklyDigest() {
     return { totalActivity, totalDevs, featuredRepos };
   }, [leaderboardData, digestData]);
 
-  const weekNum = useMemo(() => getWeekNumber(digestData?.week_of), [digestData?.week_of]);
+  const volume = digestData?.volume || 1;
+  const volumeStr = String(volume).padStart(2, '0');
   const dateRange = useMemo(() => getShortDateRange(digestData?.week_of), [digestData?.week_of]);
 
   const topContributors = useMemo(() => {
@@ -194,7 +182,7 @@ export default function WeeklyDigest() {
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-tertiary opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-tertiary"></span>
             </span>
-            AI_EDITORIAL_ENGINE: {loading ? 'SYNCING' : 'ACTIVE'} // VOL_{weekNum}_RUNNING
+            AI_EDITORIAL_ENGINE: {loading ? 'SYNCING' : 'ACTIVE'} // VOL_{volumeStr}_RUNNING
           </div>
 
           <div className="flex flex-col lg:flex-row gap-12">
@@ -227,7 +215,7 @@ export default function WeeklyDigest() {
                 <div className="text-[10px] text-primary uppercase mb-1">Session_Metadata</div>
                 <div className="flex justify-between items-end">
                   <span className="text-xl font-bold tracking-tighter">
-                    {loading ? '...' : `WEEK_${weekNum}`}
+                    {loading ? '...' : `VOL_${volumeStr}`}
                   </span>
                   <span className="text-[10px] text-outline">{loading ? '' : dateRange}</span>
                 </div>
@@ -312,51 +300,58 @@ export default function WeeklyDigest() {
               <span className="material-symbols-outlined text-primary">history</span>
               <h2 className="font-headline text-xl font-bold uppercase tracking-tighter">PREVIOUS_REPORTS</h2>
             </div>
-            <button className="bg-primary text-on-primary px-4 py-2 font-mono text-[10px] uppercase tracking-widest glow-button transition-all">
-              VIEW_ALL_ARCHIVES
-            </button>
+            {volume > 1 && (
+              <button
+                onClick={() => onChangeTab?.('archives')}
+                className="bg-primary text-on-primary px-4 py-2 font-mono text-[10px] uppercase tracking-widest glow-button transition-all"
+              >
+                VIEW_ALL_ARCHIVES
+              </button>
+            )}
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="border border-outline-variant bg-surface p-6 font-mono flex flex-col justify-between group hover:border-primary transition-colors cursor-pointer">
-              <div>
-                <div className="text-[10px] text-primary mb-1 uppercase tracking-[0.2em] font-bold">Released: 14_OCT_2024</div>
-                <h3 className="text-on-surface font-headline font-bold text-xl mb-1 group-hover:text-primary transition-colors uppercase tracking-tighter">Weekly Dispatch: Vol_03</h3>
-                <div className="text-[12px] text-outline mb-3 font-mono">The Rust Uprising</div>
-                <p className="text-[10px] text-outline-variant line-clamp-2">Deep dive into low-level systems adoption across Islamabad's emerging tech clusters.</p>
-              </div>
-              <div className="mt-4 flex items-center gap-2 text-[10px] text-primary font-bold uppercase tracking-widest">
-                <span>Read_Digest</span>
-                <span className="material-symbols-outlined text-sm">arrow_forward</span>
-              </div>
+          {volume <= 1 ? (
+            <div className="border border-dashed border-outline-variant p-12 flex flex-col items-center justify-center text-center">
+              <span className="material-symbols-outlined text-4xl text-outline mb-4">auto_stories</span>
+              <h3 className="font-headline text-lg font-bold uppercase tracking-tighter mb-2">Inception_Protocol</h3>
+              <p className="font-mono text-xs text-outline max-w-md">
+                This is VOL_01 — the first weekly digest. Previous reports will appear here as new volumes are published each week.
+              </p>
             </div>
-
-            <div className="border border-outline-variant bg-surface p-6 font-mono flex flex-col justify-between group hover:border-secondary transition-colors cursor-pointer">
-              <div>
-                <div className="text-[10px] text-secondary mb-1 uppercase tracking-[0.2em] font-bold">Released: 07_OCT_2024</div>
-                <h3 className="text-on-surface font-headline font-bold text-xl mb-1 group-hover:text-secondary transition-colors uppercase tracking-tighter">Weekly Dispatch: Vol_02</h3>
-                <div className="text-[12px] text-outline mb-3 font-mono">Karachi FinTech Boom</div>
-                <p className="text-[10px] text-outline-variant line-clamp-2">Mapping the rapid growth of transactional microservices in the southern port city.</p>
-              </div>
-              <div className="mt-4 flex items-center gap-2 text-[10px] text-secondary font-bold uppercase tracking-widest">
-                <span>Read_Digest</span>
-                <span className="material-symbols-outlined text-sm">arrow_forward</span>
-              </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {Array.isArray(digestData?.archive) && digestData.archive.map((report, idx) => {
+                const accents = [
+                  { text: 'text-primary', hover: 'hover:border-primary', groupHover: 'group-hover:text-primary' },
+                  { text: 'text-secondary', hover: 'hover:border-secondary', groupHover: 'group-hover:text-secondary' },
+                  { text: 'text-tertiary', hover: 'hover:border-tertiary', groupHover: 'group-hover:text-tertiary' },
+                ];
+                const a = accents[idx % accents.length];
+                return (
+                  <div
+                    key={report.volume || idx}
+                    onClick={() => onChangeTab?.('report_detail', report.volume)}
+                    className={`border border-outline-variant bg-surface p-6 font-mono flex flex-col justify-between group ${a.hover} transition-colors cursor-pointer`}
+                  >
+                    <div>
+                      <div className={`text-[10px] ${a.text} mb-1 uppercase tracking-[0.2em] font-bold`}>
+                        Released: {report.released || 'N/A'}
+                      </div>
+                      <h3 className={`text-on-surface font-headline font-bold text-xl mb-1 ${a.groupHover} transition-colors uppercase tracking-tighter`}>
+                        Weekly Dispatch: Vol_{String(report.volume || idx + 1).padStart(2, '0')}
+                      </h3>
+                      <div className="text-[12px] text-outline mb-3 font-mono">{report.title || ''}</div>
+                      <p className="text-[10px] text-outline-variant line-clamp-2">{report.summary || ''}</p>
+                    </div>
+                    <div className={`mt-4 flex items-center gap-2 text-[10px] ${a.text} font-bold uppercase tracking-widest`}>
+                      <span>Read_Digest</span>
+                      <span className="material-symbols-outlined text-sm">arrow_forward</span>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
-
-            <div className="border border-outline-variant bg-surface p-6 font-mono flex flex-col justify-between group hover:border-tertiary transition-colors cursor-pointer">
-              <div>
-                <div className="text-[10px] text-tertiary mb-1 uppercase tracking-[0.2em] font-bold">Released: 30_SEP_2024</div>
-                <h3 className="text-on-surface font-headline font-bold text-xl mb-1 group-hover:text-tertiary transition-colors uppercase tracking-tighter">Weekly Dispatch: Vol_01</h3>
-                <div className="text-[12px] text-outline mb-3 font-mono">Inception_Protocol</div>
-                <p className="text-[10px] text-outline-variant line-clamp-2">Initial baseline metrics for the Pakistani open-source ecosystem tracking system.</p>
-              </div>
-              <div className="mt-4 flex items-center gap-2 text-[10px] text-tertiary font-bold uppercase tracking-widest">
-                <span>Read_Digest</span>
-                <span className="material-symbols-outlined text-sm">arrow_forward</span>
-              </div>
-            </div>
-          </div>
+          )}
         </div>
       </section>
 

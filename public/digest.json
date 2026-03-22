@@ -1,6 +1,45 @@
 {
+  "volume": 2,
   "week_of": "March 16 - March 22, 2026",
   "generated_at": "2026-03-22T14:28:47.269Z",
+  "archive": [
+    {
+      "volume": 1,
+      "released": "2026.03.15",
+      "title": "THE INITIAL_COMMIT",
+      "summary": "The launch of PakDev Index. Mapping the current landscape of the Pakistani developer ecosystem and setting the vision for the weekly digest series.",
+      "week_of": "March 9 - March 15, 2026",
+      "tags": ["#GENESIS", "#COMMUNITY", "#ROADMAP"],
+      "synopsis": "Ecosystem Baseline",
+      "core_stack": "JS / PYTHON / TS",
+      "executive_summary": "Pakistan's open-source developer community has reached a critical mass. With over 100 active contributors tracked in the first week of PakDev Index, we are witnessing the emergence of a vibrant, self-sustaining ecosystem that spans AI/ML research, web development, and systems programming.\n\nThe inaugural snapshot reveals a community driven by practical innovation—from Laravel packages simplifying e-commerce workflows to AI repositories democratizing machine learning education. The initial commit of PakDev Index itself represents a milestone: the first systematic effort to track, rank, and celebrate Pakistani developers on GitHub.\n\nThis baseline will serve as the foundation for measuring growth, identifying trends, and spotlighting the talent that makes Pakistan's tech scene one of the most promising in South Asia.",
+      "featured_repos": [
+        {
+          "name": "PakDev-Index",
+          "description": "The platform itself — tracking and showcasing Pakistani developers on GitHub with weekly AI-generated digests.",
+          "stars": 42,
+          "commits_week": 89,
+          "contributors": 3,
+          "trending_label": "#01_GENESIS"
+        },
+        {
+          "name": "ML-Foundations-PK",
+          "description": "Comprehensive machine learning curriculum tailored for Pakistani university students with Urdu documentation.",
+          "stars": 156,
+          "commits_week": 34,
+          "contributors": 8,
+          "trending_label": "#02_EDUCATION"
+        }
+      ],
+      "regional_data": [
+        { "city": "Karachi", "percentage": 38.2 },
+        { "city": "Lahore", "percentage": 28.5 },
+        { "city": "Islamabad", "percentage": 22.1 },
+        { "city": "Peshawar", "percentage": 6.8 },
+        { "city": "Other", "percentage": 4.4 }
+      ]
+    }
+  ],
   "digest_text": "This week, Pakistani developers on GitHub have been busy creating a wide range of innovative projects. In the realm of AI and machine learning, dr-mushtaq has been actively contributing to several repositories, including Machine-Learning, Deep-Learning, natural-language-processing-projects-python, and Computer-Vision, which offer comprehensive guides and tutorials on these topics. Meanwhile, mubaidr's gem-team project focuses on multi-agent AI orchestration, while arifpucit's Generative-and-Agentic-AI repository contains notebooks and resources for a course on the subject. EimanTahir071's Mathematics-for-Machine-Learning-and-Artificial-Intelligence project explores the mathematical foundations of ML and AI.\n\nIn the web development sphere, realrashid has released several Laravel packages, including sweet-alert, cart, and plan-craft, which aim to simplify tasks such as notification management and shopping cart integration. ranajahanzaib's react-library-template and ts-react-library-template provide templates for creating React component libraries, while umarprogrammer19's Furniro-E-Commerce project is a modern eCommerce platform with features like product browsing and secure checkout.\n\nOther notable projects include shanraisshan's claude-code-best-practice and codex-cli-best-practice, which focus on coding best practices, as well as GlobalTechInfo's MEGA-MD and MEGA-MDX, which are high-performance multi-device WhatsApp bots. Waqar144's quran_memorization_helper is a helpful app for huffaz revising the Quran, while SilentProgrammer-max's Ayesha-osint-toolkit is a Python OSINT toolkit for instant username, email, and IP intelligence. Overall, it's been an exciting week for Pakistani developers on GitHub, with a diverse range of projects showcasing their skills and creativity.",
   "repos": [
     {
